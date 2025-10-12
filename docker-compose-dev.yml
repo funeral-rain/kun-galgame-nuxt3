@@ -1,0 +1,23 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    image: kun-visual-novel:latest
+    container_name: kun-visual-novel-app
+
+    restart: unless-stopped
+
+    # sync ecosystem.config.js port
+    environment:
+      PORT: 7777
+    ports:
+      - "7777:7777"
+    # mount .env file
+    volumes:
+      - .:/app/environment
+    # sync ecosystem.config.js 1G max memory
+    deploy:
+      resources:
+        limits:
+          memory: 1G
