@@ -1,0 +1,51 @@
+services:
+  app:
+    image: funeralrain/kun-visual-novel:latest
+    container_name: kun-visual-novel-app
+
+    restart: unless-stopped
+
+    # sync ecosystem.config.js port
+    environment:
+      PORT: 7777
+    ports:
+      - "7777:7777"
+    # mount .env file
+    volumes:
+      - .:/app/environment
+    # sync ecosystem.config.js 1G max memory
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  redis:
+    image: redis:7
+    container_name: kungal-redis
+    volumes:
+      - redis-data:/data
+    network_mode: "service:app"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 30s
+      timeout: 5s
+
+  db:
+    image: postgres:16
+    container_name: kungal-db
+    environment:
+      POSTGRES_DB: kungalgame
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 5s
+    network_mode: "service:app"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  redis-data:
+  postgres-data:
+
